@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reverse QR Prototype - RBIH Sandbox Concept</title>
+<style>
+:root {
+--primary: #0f766e;
+--primary-light: #ccfbf1;
+--dark: #0f172a;
+--light: #f8fafc;
+--success: #16a34a;
+--danger: #dc2626;
+--border: #cbd5e1;
+}
+
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+background-color: #f1f5f9;
+color: var(--dark);
+padding: 2rem 1rem;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.container {
+max-width: 1000px;
+width: 100%;
+background: white;
+padding: 2rem;
+border-radius: 12px;
+box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+header {
+text-align: center;
+margin-bottom: 2rem;
+border-bottom: 2px solid var(--light);
+padding-bottom: 1.5rem;
+}
+
+header h1 {
+color: var(--primary);
+font-size: 1.8rem;
+margin-bottom: 0.5rem;
+}
+
+header p {
+color: #64748b;
+font-size: 0.95rem;
+}
+
+.badge {
+background: var(--primary-light);
+color: var(--primary);
+padding: 0.25rem 0.75rem;
+border-radius: 50px;
+font-size: 0.8rem;
+font-weight: bold;
+display: inline-block;
+margin-top: 0.5rem;
+}
+
+.grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 2rem;
+}
+
+@media (max-width: 768px) {
+.grid {
+grid-template-columns: 1fr;
+}
+}
+
+.panel {
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 1.5rem;
+background: var(--light);
+}
+
+.panel-title {
+font-size: 1.1rem;
+font-weight: bold;
+margin-bottom: 1rem;
+color: var(--primary);
+display: flex;
+align-items: center;
+gap: 0.5rem;
+}
+
+/* Token UI Elements */
+.token-card {
+background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+color: white;
+padding: 1.5rem;
+border-radius: 12px;
+position: relative;
+box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+margin-bottom: 1.5rem;
+}
+
+.token-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 1.5rem;
+}
+
+.qr-placeholder {
+background: white;
+width: 120px;
+height: 120px;
+margin: 0 auto 1rem auto;
+padding: 0.5rem;
+border-radius: 8px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+}
+
+.qr-graphic {
+width: 90px;
+height: 90px;
+background: #000;
+/* Mocking a QR code structural aesthetic pattern */
+background-image: linear-gradient(45deg, #fff 25%, transparent 25%), linear-gradient(-45deg, #fff 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #fff 75%), linear-gradient(-45deg, transparent 75%, #fff 75%);
+background-size: 10px 10px;
+border: 2px solid black;
+}
+
+/* PIN sequence monitor list styling */
+.pin-pool {
+display: flex;
+gap: 0.5rem;
+justify-content: center;
+flex-wrap: wrap;
+margin-top: 1rem;
+}
+
+.pin-pill {
+padding: 0.4rem 0.8rem;
+background: #e2e8f0;
+border-radius: 4px;
+font-family: monospace;
+font-size: 0.9rem;
+font-weight: bold;
+color: #475569;
+transition: all 0.3s ease;
+}
+
+.pin-pill.active {
+background: #fef08a;
+color: #854d0e;
+border: 1px dashed #ca8a04;
+transform: scale(1.05);
+}
+
+.pin-pill.burned {
+background: #fee2e2;
+color: var(--danger);
+text-decoration: line-through;
+opacity: 0.6;
+}
+
+/* Hardware Terminal Keypad UI CSS */
+.terminal {
+background: #27272a;
+border-radius: 12px;
+padding: 1.5rem;
+color: #f4f4f5;
+box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.terminal-screen {
+background: #042f1a;
+color: #4ade80;
+font-family: monospace;
+padding: 1rem;
+border-radius: 6px;
+margin-bottom: 1.5rem;
+min-height: 80px;
+border: 2px solid #14532d;
+text-align: center;
+}
+
+.screen-status {
+font-size: 0.8rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+color: #22c55e;
+margin-bottom: 0.25rem;
+}
+
+.screen-display {
+font-size: 1.3rem;
+font-weight: bold;
+}
+
+.keypad {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 0.75rem;
+max-width: 240px;
+margin: 0 auto;
+}
+
+.key {
+background: #3f3f46;
+border: none;
+color: white;
+padding: 1rem;
+font-size: 1.2rem;
+font-weight: bold;
+border-radius: 6px;
+cursor: pointer;
+box-shadow: 0 3px 0 #18181b;
+transition: all 0.1s ease;
+}
+
+.key:active {
+transform: translateY(3px);
+box-shadow: none;
+}
+
+.key.clear { background: #71717a; }
+.key.enter { background: var(--success); box-shadow: 0 3px 0 #166534; }
+
+/* System Logs styling elements */
+.log-box {
+margin-top: 1.5rem;
+background: #0f172a;
+color: #38bdf8;
+font-family: monospace;
+padding: 1rem;
+border-radius: 6px;
+font-size: 0.85rem;
+max-height: 150px;
+overflow-y: auto;
+}
+
+.btn {
+display: block;
+width: 100%;
+background: var(--primary);
+color: white;
+border: none;
+padding: 0.75rem;
+border-radius: 6px;
+font-weight: bold;
+cursor: pointer;
+text-align: center;
+margin-top: 1rem;
+text-decoration: none;
+}
+
+.btn:hover { background: #0d5e57; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<header>
+<h1>Reverse QR: Device-Independent UPI Flow</h1>
+<p>A functional architecture simulation validating the Sequential PIN Burn Framework for RBIH</p>
+<span class="badge">Operational Sandbox Mock Prototype</span>
+</header>
+
+<div class="grid">
+<div class="panel">
+<div class="panel-title">🎴 1. Payer's Physical Token Asset</div>
+<p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">
+Simulates offline card printed or static asset[cite: 64]. Contains structural dynamic routing maps without primary banking key values[cite: 101].
+</p>
+
+<div class="token-card">
+<div class="token-header">
+<strong>REVERSE QR PASS</strong>
+<small>Device-Independent Auth</small>
+</div>
+<div class="qr-placeholder">
+<div class="qr-graphic"></div>
+</div>
+<div style="text-align: center; font-size: 0.8rem; opacity: 0.8;">
+Route ID: token_u_npci_9842@rbih
+</div>
+</div>
+
+<p style="font-weight: bold; font-size: 0.9rem; margin-bottom: 0.25rem;">User's Configured Sequential Queue Engine:</p>
+<p style="font-size:0.8rem; color:#64748b; margin-bottom:0.5rem;">The underlying matrix stack mapping valid hashes[cite: 92]. System validates sequence order strictly[cite: 71].</p>
+<div class="pin-pool" id="pinPool">
+</div>
+
+<button class="btn" style="background:#64748b;" onclick="resetSimulation()">Reset Token State Lifecycle</button>
+</div>
+
+<div class="panel">
+<div class="panel-title">📟 2. Merchant POS Infrastructure Emulator</div>
+<p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">
+Simulates online processing state[cite: 65, 68]. Merchant scans physical token and prompts user entry parameter values[cite: 63, 65].
+</p>
+
+<div class="terminal">
+<div class="terminal-screen">
+<div class="screen-status" id="terminalStatus">READY TO SCAN</div>
+<div class="screen-display" id="terminalDisplay">★ SYSTEM ACTIVE ★</div>
+</div>
+
+<div class="keypad">
+<button class="key" onclick="pressKey('1')">1</button>
+<button class="key" onclick="pressKey('2')">2</button>
+<button class="key" onclick="pressKey('3')">3</button>
+<button class="key" onclick="pressKey('4')">4</button>
+<button class="key" onclick="pressKey('5')">5</button>
+<button class="key" onclick="pressKey('6')">6</button>
+<button class="key" onclick="pressKey('7')">7</button>
+<button class="key" onclick="pressKey('8')">8</button>
+<button class="key" onclick="pressKey('9')">9</button>
+<button class="key clear" onclick="pressKey('C')">C</button>
+<button class="key" onclick="pressKey('0')">0</button>
+<button class="key enter" onclick="pressKey('E')">E</button>
+</div>
+</div>
+
+<p style="font-weight: bold; font-size: 0.9rem; margin-top: 1.5rem; margin-bottom: 0.25rem;">System Gateway Event Console:</p>
+<div class="log-box" id="logBox">
+System initializing validation pipeline... Ready.
+</div>
+</div>
+</div>
+</div>
+
+<script>
+// Configuration mapping core deterministic static parameters arrays mock
+const pinSequence = ["4021", "8934", "1105", "5762", "9319"];
+let currentSequenceIndex = 0;
+let inputBuffer = "";
+let systemState = "SCAN_REQUIRED"; // SCAN_REQUIRED, PIN_PROMPT, AUTH_SUCCESS, FAILURE
+
+function initPrototype() {
+renderPinPool();
+updateTerminal();
+}
+
+function renderPinPool() {
+const poolContainer = document.getElementById("pinPool");
+poolContainer.innerHTML = "";
+
+pinSequence.forEach((pin, index) => {
+const pill = document.createElement("div");
+pill.classList.add("pin-pill");
+pill.innerText = `PIN #${index + 1}: ${pin}`;
+
+if (index < currentSequenceIndex) {
+pill.classList.add("burned");
+pill.innerText += " [BURNED]";
+} else if (index === currentSequenceIndex) {
+pill.classList.add("active");
+pill.innerText += " [ACTIVE]";
+}
+poolContainer.appendChild(pill);
+});
+}
+
+function updateTerminal() {
+const statusEl = document.getElementById("terminalStatus");
+const displayEl = document.getElementById("terminalDisplay");
+
+if (systemState === "SCAN_REQUIRED") {
+statusEl.innerText = "AUTHENTICATION CHANNEL CLOSED";
+statusEl.style.color = "#fb923c";
+displayEl.innerText = "👉 Click Card QR to Scan";
+displayEl.style.cursor = "pointer";
+// Allow clicking the graphic block card element placeholder to trigger scan event action sequence flow
+document.querySelector('.token-card').onclick = triggerScanAction;
+} else if (systemState === "PIN_PROMPT") {
+statusEl.innerText = "TOKEN VALIDATED: ENTER ACTIVE PIN";
+statusEl.style.color = "#4ade80";
+displayEl.innerText = "".padStart(inputBuffer.length, "*") || "ENTER 4-DIGIT PIN";
+document.querySelector('.token-card').onclick = null;
+} else if (systemState === "AUTH_SUCCESS") {
+statusEl.innerText = "TX COMPLETED STATUS: OK";
+statusEl.style.color = "#4ade80";
+displayEl.innerText = "✅ Settle Success! [Rs. 250]";
+} else if (systemState === "FAILURE") {
+statusEl.innerText = "HARDWARE VALIDATION CRITICAL EXCEPTION";
+statusEl.style.color = "#f87171";
+displayEl.innerText = "❌ Security Replay Alert";
+}
+}
+
+function triggerScanAction() {
+if (systemState !== "SCAN_REQUIRED") return;
+
+if (currentSequenceIndex >= pinSequence.length) {
+logMessage("CRITICAL EXCEPTION: All sequential hashes exhausted. Please refresh token index bounds via app authorization.");
+systemState = "FAILURE";
+updateTerminal();
+return;
+}
+
+logMessage("Merchant hardware peripheral triggered scan framework on static target.");
+logMessage(`Routing transaction verification path for internal pointer token index ref: [Slot #${currentSequenceIndex + 1}]`);
+systemState = "PIN_PROMPT";
+updateTerminal();
+}
+
+function pressKey(val) {
+if (systemState !== "PIN_PROMPT") {
+logMessage("System operation trace exception: Scan initialization vector step required before input context generation.");
+return;
+}
+
+if (val === "C") {
+inputBuffer = "";
+updateTerminal();
+} else if (val === "E") {
+validateInputPIN();
+} else {
+if (inputBuffer.length < 4) {
+inputBuffer += val;
+updateTerminal();
+}
+}
+}
+
+function validateInputPIN() {
+if (inputBuffer.length !== 4) {
+logMessage("Validation failure: Length specification profile out of baseline limits.");
+return;
+}
+
+const expectedPIN = pinSequence[currentSequenceIndex];
+logMessage(`Transmitting current entry payload to centralized routing switch mapper...`);
+
+if (inputBuffer === expectedPIN) {
+logMessage(`MAPPING MATCH FOUND: Hash verified successfully.`);
+logMessage(`BURN CORE MECHANISM EXECUTED: Invalidating entry parameter index string [${expectedPIN}] permanently.`);
+
+currentSequenceIndex++;
+systemState = "AUTH_SUCCESS";
+renderPinPool();
+updateTerminal();
+
+setTimeout(() => {
+if (currentSequenceIndex < pinSequence.length) {
+systemState = "SCAN_REQUIRED";
+inputBuffer = "";
+logMessage("Pipeline interface cycled safely to next active sequential entry tracking array slot.");
+updateTerminal();
+} else {
+logMessage("NOTICE: Token lifecycle storage index bound exhaustion achieved.");
+systemState = "SCAN_REQUIRED";
+updateTerminal();
+}
+}, 3000);
+
+} else {
+logMessage(`SECURITY CRITICAL MATCH ERROR: Received invalid input structure string credential. Target sequence value preserved intact.`);
+inputBuffer = "";
+systemState = "SCAN_REQUIRED";
+updateTerminal();
+}
+}
+
+function logMessage(msg) {
+const logBox = document.getElementById("logBox");
+const timestamp = new Date().toLocaleTimeString();
+logBox.innerHTML += `<div>[${timestamp}] ${msg}</div>`;
+logBox.scrollTop = logBox.scrollHeight;
+}
+
+function resetSimulation() {
+currentSequenceIndex = 0;
+inputBuffer = "";
+systemState = "SCAN_REQUIRED";
+document.getElementById("logBox").innerHTML = "System tracking states storage variables cleared safely. Simulation restarted.";
+initPrototype();
+}
+
+// Trigger lifecycle mapping on instantiation phase entry array mapping
+window.onload = initPrototype;
+</script>
+
+</body>
+</html>
