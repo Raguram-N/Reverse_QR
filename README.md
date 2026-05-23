@@ -1,7 +1,5 @@
 # Reverse QR: Device-Independent UPI  
-## A Resilience Layer for India’s Digital Payment Infrastructure  
-
-**Author:** Raguram Narayanaswamy  
+A Resilience Layer for India’s Digital Payment Infrastructure  
 
 ---
 
@@ -14,7 +12,7 @@ India’s UPI ecosystem has transformed digital payments at population scale. Ho
 - Sufficient battery availability  
 - Continuous physical access to the device  
 
-As digital payments increasingly become foundational public infrastructure, payment continuity during temporary device disruption becomes an important resilience consideration.
+<img src="Problem.png" width="95%" style="border-radius:10px; box-shadow: 0px 0px 8px rgba(0,0,0,0.2);" />
 
 ---
 
@@ -22,13 +20,17 @@ As digital payments increasingly become foundational public infrastructure, paym
 
 Reverse QR proposes a device-independent payment initiation model where the merchant scans the payer’s secure physical QR token, reversing the conventional UPI transaction flow.
 
-### Existing Flow
-- Merchant displays QR → Payer scans using smartphone  
+ Existing Flow
+> Merchant displays QR → Payer scans using smartphone  
 
-### Proposed Reverse QR Flow
-- Payer presents secure QR token → Merchant scans → User authenticates securely  
+Proposed Reverse QR Flow
+> Payer presents secure QR token → Merchant scans → User authenticates securely  
 
-The objective is not to replace existing UPI systems, but to introduce a payment continuity fallback layer for constrained environments and emergency scenarios.
+As digital payments increasingly become foundational public infrastructure, payment continuity during temporary device disruption becomes an important resilience consideration.
+
+
+<img src="solution.1.png" width="95%" style="border-radius:10px; box-shadow: 0px 0px 8px rgba(0,0,0,0.2);" />
+
 
 ---
 
@@ -50,18 +52,15 @@ The objective is not to replace existing UPI systems, but to introduce a payment
 
 ## Prototype
 
-🔗 Prototype Link:  
-https://raguram-n.github.io/Reverse_QR/
+🔗 Prototype Link: https://raguram-n.github.io/Reverse_QR/
 
 ---
 
 ## Key Innovation: Sequential PIN Burn Mechanism
 
-One of the primary challenges in device-independent payments is mitigating credential theft and replay attacks on third-party merchant devices.
+One of the primary challenges in device-independent payments is mitigating credential theft and replay attacks on third-party merchant devices. To address this, Reverse QR introduces
 
-To address this, Reverse QR introduces a:
-
-## “Sequential PIN Burn Architecture”
+> “Sequential PIN Burn Architecture”
 
 ### Mechanism
 
